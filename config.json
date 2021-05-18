@@ -1,0 +1,9 @@
+[
+  {
+    "title": "Number Satisfied",
+    "type": "bool",
+    "desc": "Annotates how many fields are already satisfied.",
+    "section": "minesweeper",
+    "key": "number_satisfied"
+  }
+]

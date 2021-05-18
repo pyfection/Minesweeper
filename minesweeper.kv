@@ -1,0 +1,11 @@
+FloatLayout:
+    ScrollView:
+        Grid:
+            id: grid
+
+    Switch:
+        size_hint: None, None
+        size: 50, 50
+        pos_hint: {'center_x': 0.5}
+        y: dp(10)
+        on_active: grid.flagging = self.active

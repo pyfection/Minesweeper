@@ -83,7 +83,7 @@ class Grid(GridLayout):
     rows = NumericProperty(10)
     bombs = 10
     is_new = True
-    flagging = False
+    mode = OptionProperty('uncover', options=['uncover', 'flag'])
 
     def __init__(self, **kwargs):
         self.field = {}
@@ -113,7 +113,7 @@ class Grid(GridLayout):
                 fields.remove((ax, ay))
 
         for i in range(self.bombs):
-            j = random.randint(0, len(fields))
+            j = random.randint(0, len(fields)-1)
             field = fields.pop(j)
             self.field[field].has_bomb = True
 
@@ -140,7 +140,7 @@ class Grid(GridLayout):
                 self.uncover(ax, ay)
 
     def on_click(self, btn):
-        if self.flagging:
+        if self.mode == 'flag':
             if btn.status == 'covered':
                 btn.status = 'flagged'
                 return

@@ -5,6 +5,7 @@ from kivy.factory import Factory
 
 
 Factory.register('Grid', module='uix.grid')
+Factory.register('OptionsBar', module='uix.options_bar')
 
 
 class Minesweeper(MDApp):

@@ -3,9 +3,10 @@ FloatLayout:
         Grid:
             id: grid
 
-    Switch:
+    OptionsBar:
         size_hint: None, None
-        size: 50, 50
+        size: dp(150), dp(50)
         pos_hint: {'center_x': 0.5}
         y: dp(10)
-        on_active: grid.flagging = self.active
+        options: [{'name': 'uncover', 'source': 'img/bomb.png'}, {'name': 'flag', 'source': 'img/flag.png'}]
+        on_current: grid.mode = self.current

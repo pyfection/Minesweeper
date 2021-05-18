@@ -81,7 +81,8 @@ class GridButton(ButtonBehavior, Image):
 class Grid(GridLayout):
     cols = NumericProperty(10)
     rows = NumericProperty(10)
-    bombs = 10
+    bombs = NumericProperty(10)
+    flags = NumericProperty(0)
     is_new = True
     mode = OptionProperty('uncover', options=['uncover', 'flag'])
 
@@ -143,9 +144,11 @@ class Grid(GridLayout):
         if self.mode == 'flag':
             if btn.status == 'covered':
                 btn.status = 'flagged'
+                self.flags += 1
                 return
             elif btn.status == 'flagged':
                 btn.status = 'covered'
+                self.flags -= 1
                 return
 
         if btn.status == 'uncovered':

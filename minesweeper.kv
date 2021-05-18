@@ -10,3 +10,9 @@ FloatLayout:
         y: dp(10)
         options: [{'name': 'uncover', 'source': 'img/bomb.png'}, {'name': 'flag', 'source': 'img/flag.png'}]
         on_current: grid.mode = self.current
+
+    Label:
+        pos: dp(10), dp(10)
+        size_hint: None, None
+        size: self.texture_size
+        text: "Bombs: " + str(grid.bombs - grid.flags)

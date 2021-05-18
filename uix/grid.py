@@ -1,7 +1,7 @@
 import random
 
 from kivy.lang.builder import Builder
-from kivy.properties import NumericProperty, ListProperty, OptionProperty
+from kivy.properties import BooleanProperty, NumericProperty, ListProperty, OptionProperty
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.image import Image
@@ -83,16 +83,20 @@ class Grid(GridLayout):
     rows = NumericProperty(10)
     bombs = NumericProperty(10)
     flags = NumericProperty(0)
-    is_new = True
     mode = OptionProperty('uncover', options=['uncover', 'flag'])
+    status = OptionProperty('setup', options=['new', 'active', 'won', 'lost', 'setup'])
 
     def __init__(self, **kwargs):
         self.field = {}
         super().__init__(**kwargs)
         self.refresh()
 
+    def get_max_widgets(self):
+        # Overwriting to avoid error
+        return None
+
     def refresh(self):
-        self.is_new = True
+        self.status = 'setup'
         self.clear_widgets()
         self.field = {(x, y): GridButton(coord=(x, y)) for y in range(self.rows) for x in range(self.cols)}
         for btn in self.field.values():
@@ -126,6 +130,8 @@ class Grid(GridLayout):
         field.status = 'uncovered'
         if field.number == 0:
             self.uncover_neighbours(x, y)
+        elif field.number is None:
+            self.status = 'lost'
 
     def uncover_neighbours(self, x, y):
         for rx in range(-1, 2):
@@ -141,6 +147,9 @@ class Grid(GridLayout):
                 self.uncover(ax, ay)
 
     def on_click(self, btn):
+        if self.status in ('won', 'lost', 'setup'):
+            return
+
         if self.mode == 'flag':
             if btn.status == 'covered':
                 btn.status = 'flagged'
@@ -155,14 +164,19 @@ class Grid(GridLayout):
             if btn.flagged == btn.number:
                 self.uncover_neighbours(*btn.coord)
 
-        if self.is_new:
+        if self.status == 'new':
             self.generate(*btn.coord)
-            self.is_new = False
+            self.status = 'active'
 
         self.uncover(*btn.coord)
 
-    def on_cols(self, cols):
+        # Check if all fields are uncovered
+        covered = len([field for field in self.field.values() if field.status in ('covered', 'flagged')])
+        if covered == self.bombs:
+            self.status = 'won'
+
+    def on_cols(self, _, cols):
         self.refresh()
 
-    def on_rows(self, rows):
+    def on_rows(self, _, rows):
         self.refresh()

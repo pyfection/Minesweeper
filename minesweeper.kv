@@ -1,18 +1,78 @@
 FloatLayout:
     ScrollView:
+        canvas.before:
+            Color:
+                rgb: app.background_color
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
         Grid:
             id: grid
-
-    OptionsBar:
-        size_hint: None, None
-        size: dp(150), dp(50)
-        pos_hint: {'center_x': 0.5}
-        y: dp(10)
-        options: [{'name': 'uncover', 'source': 'img/bomb.png'}, {'name': 'flag', 'source': 'img/flag.png'}]
-        on_current: grid.mode = self.current
+            pos_hint: {'top': 1}
+            size_hint: None, None
+            width: self.cols * 32
+            height: self.rows * 32
+            on_status: game_status.text = "Won" if self.status == 'won' else "Lost" if self.status == 'lost' else ''
 
     Label:
-        pos: dp(10), dp(10)
-        size_hint: None, None
-        size: self.texture_size
-        text: "Bombs: " + str(grid.bombs - grid.flags)
+        id: game_status
+
+    ScreenManager:
+        id: sm
+
+        Screen:
+            BoxLayout:
+                size_hint_y: None
+                height: dp(100)
+                orientation: "vertical"
+
+                GridLayout:
+                    cols: 2
+
+                    Label:
+                        text: "Rows"
+                    MDSlider:
+                        min: 3
+                        max: 20
+                        value: 10
+                        on_value: grid.rows = int(self.value)
+
+
+                    Label:
+                        text: "Columns"
+                    MDSlider:
+                        min: 3
+                        max: 20
+                        value: 10
+                        on_value: grid.cols = int(self.value)
+
+                    Label:
+                        text: "Bombs"
+                    MDSlider:
+                        min: 1
+                        max: 100
+                        value: 10
+                        on_value: grid.bombs = int(self.value)
+
+                MDFlatButton:
+                    text: "Generate!"
+                    size_hint_x: 1
+                    on_press: sm.current = 'game'; grid.status = 'new'
+
+        Screen:
+            name: 'game'
+            FloatLayout:
+                OptionsBar:
+                    size_hint: None, None
+                    size: dp(150), dp(50)
+                    pos_hint: {'center_x': 0.5}
+                    y: dp(10)
+                    options: [{'name': 'uncover', 'source': 'img/bomb.png'}, {'name': 'flag', 'source': 'img/flag.png'}]
+                    on_current: grid.mode = self.current
+
+                Label:
+                    pos: dp(10), dp(10)
+                    size_hint: None, None
+                    size: self.texture_size
+                    text: "Bombs: " + str(grid.bombs - grid.flags)

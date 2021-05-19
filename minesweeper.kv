@@ -37,7 +37,7 @@ FloatLayout:
                         text: "Rows: " + str(int(cols_slider.value))
                     MDSlider:
                         id: cols_slider
-                        min: 3
+                        min: 5
                         max: 20
                         value: 10
                         on_value: grid.rows = int(self.value)
@@ -47,7 +47,7 @@ FloatLayout:
                         text: "Columns: " + str(int(rows_slider.value))
                     MDSlider:
                         id: rows_slider
-                        min: 3
+                        min: 5
                         max: 20
                         value: 10
                         on_value: grid.cols = int(self.value)
@@ -57,7 +57,7 @@ FloatLayout:
                     MDSlider:
                         id: bombs_slider
                         min: 1
-                        max: 100
+                        max: min(100, cols_slider.value * rows_slider.value - 9)
                         value: 10
                         on_value: grid.bombs = int(self.value)
 

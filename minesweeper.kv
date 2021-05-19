@@ -22,6 +22,7 @@ FloatLayout:
         id: sm
 
         Screen:
+            name: 'setup'
             BoxLayout:
                 size_hint_y: None
                 height: dp(100)
@@ -72,7 +73,7 @@ FloatLayout:
             FloatLayout:
                 OptionsBar:
                     size_hint: None, None
-                    size: dp(150), dp(50)
+                    size: dp(32*3), dp(32)
                     pos_hint: {'center_x': 0.5}
                     y: dp(10)
                     options: [{'name': 'uncover', 'source': 'img/bomb.png'}, {'name': 'flag', 'source': 'img/flag.png'}]
@@ -83,3 +84,10 @@ FloatLayout:
                     size_hint: None, None
                     size: self.texture_size
                     text: "Bombs: " + str(grid.bombs - grid.flags)
+
+                ImageButton:
+                    size_hint: None, None
+                    size: dp(32), dp(32)
+                    pos: root.right - dp(self.width+10), dp(10)
+                    source: 'img/reset.png'
+                    on_press: sm.current = 'setup'; grid.refresh()

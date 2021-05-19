@@ -97,6 +97,7 @@ class Grid(GridLayout):
 
     def refresh(self):
         self.status = 'setup'
+        self.flags = 0
         self.clear_widgets()
         self.field = {(x, y): GridButton(coord=(x, y)) for y in range(self.rows) for x in range(self.cols)}
         for btn in self.field.values():

@@ -1,16 +1,45 @@
 <GridButton>:
-    source: 'img/tile_full.png'
+    main_img: main_img
+    number_img: number_img
+    annotate_img: annotate_img
     on_press: self.parent.on_click(self)
     size_hint: None, None
     size: 32, 32
 
-    canvas:
-        Color:
-            rgb: app.foreground_color
-        Rectangle:
-            texture: self.texture
-            pos: self.pos
-            size: self.size
+    Image:
+        id: main_img
+        source: 'img/tile_full.png'
+        canvas:
+            Color:
+                rgba: app.foreground_color
+            Rectangle:
+                texture: self.texture
+                pos: self.pos
+                size: self.size
+
+    Image:
+        id: number_img
+        source: 'img/num_0.png'
+        canvas:
+            Color:
+                rgba: app.foreground_color
+            Rectangle:
+                texture: self.texture
+                pos: self.pos
+                size: self.size
+
+    Image:
+        id: annotate_img
+        source: 'img/num_0.png'
+        size_hint: None, None
+        size: 16, 16
+        canvas:
+            Color:
+                rgba: app.foreground_color
+            Rectangle:
+                texture: self.texture
+                pos: self.pos
+                size: self.size
 
 <Grid>:
     canvas.before:

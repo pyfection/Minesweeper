@@ -1,37 +1,59 @@
 import random
 from time import time
 
+from kivymd.app import MDApp
 from kivy.clock import Clock
 from kivy.lang.builder import Builder
-from kivy.properties import BooleanProperty, NumericProperty, ListProperty, OptionProperty
+from kivy.properties import BooleanProperty, NumericProperty, ListProperty, OptionProperty, ObjectProperty
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.behaviors import ButtonBehavior
-from kivy.uix.image import Image
 
 
 Builder.load_file('uix/grid.kv')
 
 
-class GridButton(ButtonBehavior, Image):
+class GridButton(ButtonBehavior, RelativeLayout):
     coord = ListProperty()
     status = OptionProperty('covered', options=['covered', 'uncovered', 'flagged'])
     has_bomb = False
+    flagged = NumericProperty(0)
     images = {
         'covered': 'img/tile_full.png',
         'uncovered': 'img/tile_empty.png',
         'flagged': 'img/tile_flag.png',
-        'number': 'img/tile_{num}.png',
         'bomb': 'img/tile_bomb.png',
     }
 
     def on_status(self, _, status):
         number = self.number
-        if status == 'uncovered' and number:
-            self.source = self.images['number'].format(num=number)
-        elif status == 'uncovered' and number is None:
-            self.source = self.images['bomb']
+        if status == 'uncovered' and number is None:
+            self.main_img.source = self.images['bomb']
         else:
-            self.source = self.images[status]
+            self.main_img.source = self.images[status]
+
+        if status == 'uncovered' and number is not None:
+            self.number_img.source = f'img/num_{number}.png'
+
+        # Update flags set on neighbours
+        x, y = self.coord
+        f = int(status == 'flagged')
+        for rx in range(-1, 2):
+            ax = x + rx
+            if not (0 <= ax < self.parent.cols):
+                continue
+
+            for ry in range(-1, 2):
+                ay = y + ry
+                if not (0 <= ay < self.parent.rows):
+                    continue
+
+                self.parent.field[(ax, ay)].flagged += f
+
+    def on_flagged(self, _, flagged):
+        if self.number and MDApp.get_running_app().config.get('minesweeper', 'number_satisfied'):
+            ann = max(self.number-flagged, 0)
+            self.annotate_img.source = f'img/num_{ann}.png'
 
     @property
     def number(self):
@@ -52,29 +74,6 @@ class GridButton(ButtonBehavior, Image):
                     continue
 
                 if self.parent.field[(ax, ay)].has_bomb:
-                    num += 1
-
-        return num
-
-    @property
-    def flagged(self):
-        if self.has_bomb:
-            return None
-
-        num = 0
-        x, y = self.coord
-
-        for rx in range(-1, 2):
-            ax = x + rx
-            if not (0 <= ax < self.parent.cols):
-                continue
-
-            for ry in range(-1, 2):
-                ay = y + ry
-                if not (0 <= ay < self.parent.rows):
-                    continue
-
-                if self.parent.field[(ax, ay)].status == 'flagged':
                     num += 1
 
         return num

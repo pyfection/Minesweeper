@@ -31,8 +31,9 @@ FloatLayout:
                     cols: 2
 
                     Label:
-                        text: "Rows"
+                        text: "Rows: " + str(int(cols_slider.value))
                     MDSlider:
+                        id: cols_slider
                         min: 3
                         max: 20
                         value: 10
@@ -40,20 +41,26 @@ FloatLayout:
 
 
                     Label:
-                        text: "Columns"
+                        text: "Columns: " + str(int(rows_slider.value))
                     MDSlider:
+                        id: rows_slider
                         min: 3
                         max: 20
                         value: 10
                         on_value: grid.cols = int(self.value)
 
                     Label:
-                        text: "Bombs"
+                        text: "Bombs: " + str(int(bombs_slider.value))
                     MDSlider:
+                        id: bombs_slider
                         min: 1
                         max: 100
                         value: 10
                         on_value: grid.bombs = int(self.value)
+
+                Label:
+                    difficulty: round(bombs_slider.value / (cols_slider.value * rows_slider.value) * 100) if cols_slider.value else 0
+                    text: "Difficulty: " + str(self.difficulty) + '%' + '(' + ('easy' if self.difficulty < 7 else 'medium' if self.difficulty < 15 else 'hard' if self.difficulty < 20 else 'extreme') + ')'
 
                 MDFlatButton:
                     text: "Generate!"

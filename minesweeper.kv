@@ -1,3 +1,5 @@
+#:import timedelta datetime.timedelta
+
 FloatLayout:
     ScrollView:
         canvas.before:
@@ -84,6 +86,12 @@ FloatLayout:
                     size_hint: None, None
                     size: self.texture_size
                     text: "Bombs: " + str(grid.bombs - grid.flags)
+
+                Label:
+                    pos: dp(10), dp(20) + self.height
+                    size_hint: None, None
+                    size: self.texture_size
+                    text: "Time: " + str(timedelta(seconds=int(grid.time)))
 
                 ImageButton:
                     size_hint: None, None

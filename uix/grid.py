@@ -1,5 +1,7 @@
 import random
+from time import time
 
+from kivy.clock import Clock
 from kivy.lang.builder import Builder
 from kivy.properties import BooleanProperty, NumericProperty, ListProperty, OptionProperty
 from kivy.uix.gridlayout import GridLayout
@@ -85,6 +87,8 @@ class Grid(GridLayout):
     flags = NumericProperty(0)
     mode = OptionProperty('uncover', options=['uncover', 'flag'])
     status = OptionProperty('setup', options=['new', 'active', 'won', 'lost', 'setup'])
+    time = NumericProperty(0)  # in seconds
+    _start_time = 0
 
     def __init__(self, **kwargs):
         self.field = {}
@@ -98,6 +102,7 @@ class Grid(GridLayout):
     def refresh(self):
         self.status = 'setup'
         self.flags = 0
+        self.time = 0
         self.clear_widgets()
         self.field = {(x, y): GridButton(coord=(x, y)) for y in range(self.rows) for x in range(self.cols)}
         for btn in self.field.values():
@@ -148,6 +153,11 @@ class Grid(GridLayout):
                 self.uncover(ax, ay)
 
     def on_click(self, btn):
+        def update_time(dt):
+            if self.status != 'active':
+                Clock.unschedule(update_time)
+            self.time = time() - self._start_time
+
         if self.status in ('won', 'lost', 'setup'):
             return
 
@@ -168,6 +178,8 @@ class Grid(GridLayout):
         if self.status == 'new':
             self.generate(*btn.coord)
             self.status = 'active'
+            self._start_time = time()
+            Clock.schedule_interval(update_time, 1)
 
         self.uncover(*btn.coord)
 

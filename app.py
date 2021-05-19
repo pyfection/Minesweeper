@@ -2,6 +2,7 @@
 
 from kivymd.app import MDApp
 from kivy.factory import Factory
+from kivy.uix.settings import InterfaceWithSpinner
 
 
 Factory.register('Grid', module='uix.grid')
@@ -29,4 +30,5 @@ class Minesweeper(MDApp):
         )
 
     def on_config_change(self, config, section, key, value):
+        # e.g: "<kivy.config.ConfigParser object at 0x7f7a9922fc50> minesweeper number_satisfied 1"
         print(config, section, key, value)

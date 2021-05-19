@@ -27,7 +27,7 @@ FloatLayout:
             name: 'setup'
             BoxLayout:
                 size_hint_y: None
-                height: dp(100)
+                height: dp(150)
                 orientation: "vertical"
 
                 GridLayout:
@@ -61,14 +61,23 @@ FloatLayout:
                         value: 10
                         on_value: grid.bombs = int(self.value)
 
-                Label:
-                    difficulty: round(bombs_slider.value / (cols_slider.value * rows_slider.value) * 100) if cols_slider.value else 0
-                    text: "Difficulty: " + str(self.difficulty) + '%' + '(' + ('easy' if self.difficulty < 7 else 'medium' if self.difficulty < 15 else 'hard' if self.difficulty < 20 else 'extreme') + ')'
+                    Label:
+                        text: "Difficulty: "
+                    Label:
+                        difficulty: round(bombs_slider.value / (cols_slider.value * rows_slider.value) * 100) if cols_slider.value else 0
+                        text: str(self.difficulty) + '%  ' + '(' + ('easy' if self.difficulty < 7 else 'medium' if self.difficulty < 15 else 'hard' if self.difficulty < 20 else 'extreme') + ')'
 
-                MDFlatButton:
-                    text: "Generate!"
-                    size_hint_x: 1
-                    on_press: sm.current = 'game'; grid.status = 'new'
+                BoxLayout:
+                    MDFlatButton:
+                        text: "Generate!"
+                        size_hint_x: 1
+                        on_press: sm.current = 'game'; grid.status = 'new'
+
+                    ImageButton:
+                        size_hint: None, None
+                        size: dp(32), dp(32)
+                        source: 'img/settings.png'
+                        on_press: app.open_settings()
 
         Screen:
             name: 'game'

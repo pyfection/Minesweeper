@@ -11,7 +11,7 @@
         source: 'img/tile_full.png'
         canvas:
             Color:
-                rgba: app.foreground_color
+                rgba: app.theme_cls.primary_color
             Rectangle:
                 texture: self.texture
                 pos: self.pos
@@ -22,7 +22,7 @@
         source: 'img/num_0.png'
         canvas:
             Color:
-                rgba: app.foreground_color
+                rgba: app.theme_cls.accent_color
             Rectangle:
                 texture: self.texture
                 pos: self.pos
@@ -35,16 +35,10 @@
         size: 16, 16
         canvas:
             Color:
-                rgba: app.foreground_color
+                rgba: app.theme_cls.accent_color
             Rectangle:
                 texture: self.texture
                 pos: self.pos
                 size: self.size
 
 <Grid>:
-    canvas.before:
-        Color:
-            rgb: app.background_color
-        Rectangle:
-            pos: self.pos
-            size: self.size

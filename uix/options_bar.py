@@ -3,7 +3,7 @@
 from kivy.properties import BooleanProperty, ListProperty, StringProperty
 from kivy.lang.builder import Builder
 from kivy.uix.behaviors import ButtonBehavior
-from kivy.uix.boxlayout import BoxLayout
+from kivymd.uix.boxlayout import MDBoxLayout
 from kivy.uix.image import Image
 
 
@@ -16,10 +16,10 @@ class Option(ButtonBehavior, Image):
     name = StringProperty()
 
     def on_active(self, _, active):
-        self._color = (1, 1, 1, 0.2) if active else (1, 1, 1, 0)
+        self._color = (1, 1, 1, 0.5) if active else (1, 1, 1, 0)
 
 
-class OptionsBar(BoxLayout):
+class OptionsBar(MDBoxLayout):
     options = ListProperty()
     current = StringProperty()
 

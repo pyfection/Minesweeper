@@ -11,9 +11,6 @@ Factory.register('ImageButton', module='uix.image_button')
 
 
 class Minesweeper(MDApp):
-    foreground_color = (.57, .72, .97)
-    background_color = (.15, .16, .19)
-
     def build_config(self, config):
         config.setdefaults(
             'minesweeper',

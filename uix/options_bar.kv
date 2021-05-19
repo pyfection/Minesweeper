@@ -1,7 +1,23 @@
 <Option>:
-    canvas.before:
+    size_hint: None, None
+    size: self.texture_size
+
+    canvas.after:
         Color:
             rgba: self._color
         Rectangle:
+            texture: self.texture
             pos: self.pos
             size: self.size
+
+    canvas:
+        Color:
+            rgba: app.theme_cls.accent_color
+        Rectangle:
+            texture: self.texture
+            pos: self.pos
+            size: self.size
+
+
+<OptionsBar>:
+    adaptive_size: True

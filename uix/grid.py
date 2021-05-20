@@ -34,24 +34,28 @@ class GridButton(ButtonBehavior, RelativeLayout):
 
         if status == 'uncovered' and number is not None:
             self.number_img.source = f'img/num_{number}.png'
+            ann = max(number - self.flagged, 0)
+            self.annotate_img.source = f'img/num_{ann}.png'
 
         # Update flags set on neighbours
         x, y = self.coord
-        f = int(status == 'flagged')
-        for rx in range(-1, 2):
-            ax = x + rx
-            if not (0 <= ax < self.parent.cols):
-                continue
-
-            for ry in range(-1, 2):
-                ay = y + ry
-                if not (0 <= ay < self.parent.rows):
+        if status in ('flagged', 'covered'):
+            f = 1 if status == 'flagged' else -1
+            for rx in range(-1, 2):
+                ax = x + rx
+                if not (0 <= ax < self.parent.cols):
                     continue
 
-                self.parent.field[(ax, ay)].flagged += f
+                for ry in range(-1, 2):
+                    ay = y + ry
+                    if not (0 <= ay < self.parent.rows):
+                        continue
+
+                    field = self.parent.field[(ax, ay)]
+                    field.flagged = max(field.flagged + f, 0)
 
     def on_flagged(self, _, flagged):
-        if self.number and MDApp.get_running_app().config.get('minesweeper', 'number_satisfied'):
+        if self.status == 'uncovered' and MDApp.get_running_app().config.get('minesweeper', 'number_satisfied'):
             ann = max(self.number-flagged, 0)
             self.annotate_img.source = f'img/num_{ann}.png'
 

@@ -79,26 +79,12 @@ FloatLayout:
                         size: dp(32), dp(32)
                         source: 'img/palette.png'
                         on_press: MDThemePicker().open()
-                        canvas:
-                            Color:
-                                rgba: app.theme_cls.accent_color
-                            Rectangle:
-                                texture: self.texture
-                                pos: self.pos
-                                size: self.size
 
                     ImageButton:
                         size_hint: None, None
                         size: dp(32), dp(32)
                         source: 'img/settings.png'
                         on_press: app.open_settings()
-                        canvas:
-                            Color:
-                                rgba: app.theme_cls.accent_color
-                            Rectangle:
-                                texture: self.texture
-                                pos: self.pos
-                                size: self.size
 
         Screen:
             name: 'game'
@@ -127,12 +113,12 @@ FloatLayout:
                     size_hint: None, None
                     size: dp(32), dp(32)
                     pos: root.right - dp(self.width+10), dp(10)
+                    source: 'img/solve.png'
+                    on_press: grid.auto_solve = self.last_touch_type == 'double'; grid.solve() if self.last_touch_type == 'single' else Clock.schedule_once(lambda dt: grid.solve(), 3)
+
+                ImageButton:
+                    size_hint: None, None
+                    size: dp(32), dp(32)
+                    pos: root.right - dp(self.width+10), dp(10)
                     source: 'img/reset.png'
                     on_press: sm.current = 'setup'; grid.refresh()
-                    canvas:
-                        Color:
-                            rgba: app.theme_cls.accent_color
-                        Rectangle:
-                            texture: self.texture
-                            pos: self.pos
-                            size: self.size

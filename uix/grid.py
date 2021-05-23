@@ -92,6 +92,7 @@ class Grid(GridLayout):
     status = OptionProperty('setup', options=['new', 'active', 'won', 'lost', 'setup'])
     time = NumericProperty(0)  # in seconds
     _start_time = 0
+    auto_solve = False
 
     def __init__(self, **kwargs):
         self.field = {}
@@ -111,9 +112,7 @@ class Grid(GridLayout):
         for btn in self.field.values():
             self.add_widget(btn)
 
-    def generate(self, x, y):
-        fields = list(self.field.keys())
-
+    def neighbours(self, x, y):
         for rx in range(-1, 2):
             ax = x + rx
             if not (0 <= ax < self.cols):
@@ -124,12 +123,79 @@ class Grid(GridLayout):
                 if not (0 <= ay < self.rows):
                     continue
 
-                fields.remove((ax, ay))
+                yield ax, ay
+
+    def generate(self, x, y):
+        fields = list(self.field.keys())
+        for ax, ay in self.neighbours(x, y):
+            fields.remove((ax, ay))
 
         for i in range(self.bombs):
             j = random.randint(0, len(fields)-1)
             field = fields.pop(j)
             self.field[field].has_bomb = True
+
+    def solve(self):
+        def uncover_unflagged_neighbours():
+            for (x, y), field in self.field.items():
+                if field.status != 'uncovered':
+                    continue
+                if field.number == field.flagged:
+                    n = len([(ax, ay) for ax, ay in self.neighbours(x, y) if self.field[(ax, ay)].status == 'covered'])
+                    if n >= 1:
+                        self.uncover_neighbours(x, y)
+                        return f"Field at {x}, {y} already satisfied, uncovered unflagged neighbours."
+
+        def flag_neighbours():
+            for (x, y), field in self.field.items():
+                if field.status != 'uncovered':
+                    continue
+                dif = field.number - field.flagged
+                if dif >= 1:
+                    remaining = [
+                        (ax, ay) for ax, ay in self.neighbours(x, y)
+                        if self.field[(ax, ay)].status == 'covered'
+                    ]
+                    if len(remaining) == dif:
+                        for ax, ay in remaining:
+                            self.field[(ax, ay)].status = 'flagged'
+                            self.flags += 1
+                        return f"Field at {x}, {y} can be satisfied, marking neighbours."
+                    elif len(remaining) > dif:
+                        # More covered fields than required to satisfy number
+                        continue
+                    else:
+                        raise ValueError("It can't be, that there are less covered fields than the number needs"
+                                         "to be satisfied! (field {x}, {y})")
+
+        def uncover_most_probable():
+            # ToDo: find most probable solution
+            (x, y), field = random.choice([(c, f) for c, f in self.field.items() if f.status == 'covered'])
+            self.uncover(x, y)
+            return "Uncovering random"  #"Most probably solution"
+
+        if self.status != 'active':
+            return
+
+        if self.auto_solve:
+            Clock.schedule_once(lambda dt: self.solve(), 3)
+
+        msg = uncover_unflagged_neighbours()
+        if msg:
+            print(msg)
+            return
+
+        msg = flag_neighbours()
+        if msg:
+            print(msg)
+            return
+
+        msg = uncover_most_probable()
+        if msg:
+            print(msg)
+            return
+
+        print("Could not figure out any logical solution")
 
     def uncover(self, x, y):
         field = self.field[(x, y)]
@@ -141,19 +207,15 @@ class Grid(GridLayout):
             self.uncover_neighbours(x, y)
         elif field.number is None:
             self.status = 'lost'
+        else:
+            # Check if all fields are uncovered
+            covered = len([field for field in self.field.values() if field.status in ('covered', 'flagged')])
+            if covered == self.bombs:
+                self.status = 'won'
 
     def uncover_neighbours(self, x, y):
-        for rx in range(-1, 2):
-            ax = x + rx
-            if not (0 <= ax < self.cols):
-                continue
-
-            for ry in range(-1, 2):
-                ay = y + ry
-                if not (0 <= ay < self.rows):
-                    continue
-
-                self.uncover(ax, ay)
+        for ax, ay in self.neighbours(x, y):
+            self.uncover(ax, ay)
 
     def on_click(self, btn):
         def update_time(dt):
@@ -185,11 +247,6 @@ class Grid(GridLayout):
             Clock.schedule_interval(update_time, 1)
 
         self.uncover(*btn.coord)
-
-        # Check if all fields are uncovered
-        covered = len([field for field in self.field.values() if field.status in ('covered', 'flagged')])
-        if covered == self.bombs:
-            self.status = 'won'
 
     def on_cols(self, _, cols):
         self.refresh()

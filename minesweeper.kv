@@ -89,10 +89,10 @@ FloatLayout:
         Screen:
             name: 'game'
             BoxLayout:
-                size_hint_y: None
-                height: dp(32)
-
+                orientation: 'vertical'
                 BoxLayout:
+                    size_hint_y: None
+                    height: dp(64)
                     orientation: 'vertical'
 
                     MDLabel:
@@ -105,20 +105,26 @@ FloatLayout:
                         valign: 'bottom'
                         text: "Time: " + str(timedelta(seconds=int(grid.time)))
 
-                OptionsBar:
-                    options: [{'name': 'uncover', 'source': 'img/bomb.png'}, {'name': 'flag', 'source': 'img/flag.png'}]
-                    on_current: grid.mode = self.current
+                BoxLayout:
+                    size_hint_y: None
+                    height: dp(64)
 
-                ImageButton:
-                    size_hint: None, None
-                    size: dp(64), dp(64)
-                    pos: root.right - dp(self.width+10), dp(10)
-                    source: 'img/solve.png'
-                    on_press: grid.auto_solve = self.last_touch_type == 'double'; grid.solve() if self.last_touch_type == 'single' else Clock.schedule_once(lambda dt: grid.solve(), 3)
+                    OptionsBar:
+                        options: [{'name': 'uncover', 'source': 'img/bomb.png'}, {'name': 'flag', 'source': 'img/flag.png'}]
+                        on_current: grid.mode = self.current
 
-                ImageButton:
-                    size_hint: None, None
-                    size: dp(64), dp(64)
-                    pos: root.right - dp(self.width+10), dp(10)
-                    source: 'img/reset.png'
-                    on_press: sm.current = 'setup'; grid.refresh()
+                    Widget:
+
+                    ImageButton:
+                        size_hint: None, None
+                        size: dp(64), dp(64)
+                        pos: root.right - dp(self.width+10), dp(10)
+                        source: 'img/solve.png'
+                        on_press: grid.auto_solve = self.last_touch_type == 'double'; grid.solve() if self.last_touch_type == 'single' else Clock.schedule_once(lambda dt: grid.solve(), 3)
+
+                    ImageButton:
+                        size_hint: None, None
+                        size: dp(64), dp(64)
+                        pos: root.right - dp(self.width+10), dp(10)
+                        source: 'img/reset.png'
+                        on_press: sm.current = 'setup'; grid.refresh()

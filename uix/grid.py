@@ -9,6 +9,8 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.behaviors import ButtonBehavior
 
+import solve_states
+
 
 Builder.load_file('uix/grid.kv')
 
@@ -82,6 +84,28 @@ class GridButton(ButtonBehavior, RelativeLayout):
 
         return num
 
+    @property
+    def is_edge(self):
+        # Is covered but has uncovered neighbors
+        if self.status == 'uncovered':
+            return False
+
+        x, y = self.coord
+
+        for rx in range(-1, 2):
+            ax = x + rx
+            if not (0 <= ax < self.parent.cols):
+                continue
+
+            for ry in range(-1, 2):
+                ay = y + ry
+                if not (0 <= ay < self.parent.rows):
+                    continue
+
+                if self.parent.field[(ax, ay)].status == 'uncovered':
+                    return True
+        return False
+
 
 class Grid(GridLayout):
     cols = NumericProperty(10)
@@ -136,66 +160,27 @@ class Grid(GridLayout):
             self.field[field].has_bomb = True
 
     def solve(self):
-        def uncover_unflagged_neighbours():
-            for (x, y), field in self.field.items():
-                if field.status != 'uncovered':
-                    continue
-                if field.number == field.flagged:
-                    n = len([(ax, ay) for ax, ay in self.neighbours(x, y) if self.field[(ax, ay)].status == 'covered'])
-                    if n >= 1:
-                        self.uncover_neighbours(x, y)
-                        return f"Field at {x}, {y} already satisfied, uncovered unflagged neighbours."
-
-        def flag_neighbours():
-            for (x, y), field in self.field.items():
-                if field.status != 'uncovered':
-                    continue
-                dif = field.number - field.flagged
-                if dif >= 1:
-                    remaining = [
-                        (ax, ay) for ax, ay in self.neighbours(x, y)
-                        if self.field[(ax, ay)].status == 'covered'
-                    ]
-                    if len(remaining) == dif:
-                        for ax, ay in remaining:
-                            self.field[(ax, ay)].status = 'flagged'
-                            self.flags += 1
-                        return f"Field at {x}, {y} can be satisfied, marking neighbours."
-                    elif len(remaining) > dif:
-                        # More covered fields than required to satisfy number
-                        continue
-                    else:
-                        raise ValueError("It can't be, that there are less covered fields than the number needs"
-                                         "to be satisfied! (field {x}, {y})")
-
-        def uncover_most_probable():
-            # ToDo: find most probable solution
-            (x, y), field = random.choice([(c, f) for c, f in self.field.items() if f.status == 'covered'])
-            self.uncover(x, y)
-            return "Uncovering random"  #"Most probably solution"
-
         if self.status != 'active':
             return
 
-        if self.auto_solve:
-            Clock.schedule_once(lambda dt: self.solve(), 3)
-
-        msg = uncover_unflagged_neighbours()
-        if msg:
-            print(msg)
-            return
-
-        msg = flag_neighbours()
-        if msg:
-            print(msg)
-            return
-
-        msg = uncover_most_probable()
-        if msg:
-            print(msg)
-            return
-
-        print("Could not figure out any logical solution")
+        edges = [(x, y) for (x, y), field in self.field.items() if field.is_edge]
+        state = {
+            (x, y): field.number
+            if field.status == 'uncovered' else -1 if field.status == 'covered' else -2
+            for (x, y), field in self.field.items()
+        }
+        probabilities = solve_states.state_probabilities(state, edges.copy())
+        lowest_probability = 1
+        solve_coords = None
+        for i, (x, y) in enumerate(edges):
+            prob = probabilities[i]
+            if prob == 0:
+                solve_coords = (x, y)
+                break
+            elif prob < lowest_probability:
+                lowest_probability = prob
+                solve_coords = (x, y)
+        self.click_field(self.field[solve_coords])
 
     def uncover(self, x, y):
         field = self.field[(x, y)]
@@ -217,7 +202,7 @@ class Grid(GridLayout):
         for ax, ay in self.neighbours(x, y):
             self.uncover(ax, ay)
 
-    def on_click(self, btn):
+    def click_field(self, btn, mode='uncover'):
         def update_time(dt):
             if self.status != 'active':
                 Clock.unschedule(update_time)
@@ -226,7 +211,7 @@ class Grid(GridLayout):
         if self.status in ('won', 'lost', 'setup'):
             return
 
-        if self.mode == 'flag':
+        if mode == 'flag':
             if btn.status == 'covered':
                 btn.status = 'flagged'
                 self.flags += 1
@@ -247,6 +232,9 @@ class Grid(GridLayout):
             Clock.schedule_interval(update_time, 1)
 
         self.uncover(*btn.coord)
+
+    def on_click(self, btn):
+        self.click_field(btn, self.mode)
 
     def on_cols(self, _, cols):
         self.refresh()
